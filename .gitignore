@@ -1,0 +1,56 @@
+# General
+.DS_Store
+.idea/
+.vscode/
+*.log
+*.swp
+.env
+tmp/
+
+# Node.js / Frontend
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp/
+.pnp.js
+coverage/
+.next/
+out/
+build/
+dist/
+
+# PHP / Laravel
+/backend/vendor/
+/backend/node_modules/
+/backend/npm-debug.log
+/backend/yarn-error.log
+/backend/.env
+/backend/.env.backup
+/backend/.phpunit.result.cache
+/backend/Homestead.json
+/backend/Homestead.yaml
+/backend/public/hot
+/backend/public/storage
+/backend/storage/*.key
+/backend/storage/logs/*
+!/backend/storage/logs/.gitkeep
+/backend/storage/app/*
+!/backend/storage/app/.gitkeep
+!/backend/storage/app/public/
+/backend/storage/app/public/*
+!/backend/storage/app/public/.gitkeep
+
+# Go / Proxy Manager
+/proxy-manager/proxy-manager
+/proxy-manager/*.exe
+/proxy-manager/*.test
+/proxy-manager/*.out
+
+# Docker
+.docker-sync/
+docker-compose.override.yml
+
+# Database
+*.sqlite
+*.sqlite-journal
