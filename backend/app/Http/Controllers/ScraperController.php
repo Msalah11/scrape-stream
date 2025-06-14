@@ -4,20 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Enums\SpiderType;
 use App\Http\Requests\RunSpiderRequest;
+use App\Jobs\RunSpiderJob;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
-use RoachPHP\Roach;
-use RoachPHP\Spider\Configuration\Overrides;
 
 class ScraperController extends Controller
 {
     use ApiResponse;
-    
+
     /**
-     * Run a specific spider
-     * 
+     * Run a spider based on the provided type
+     *
      * @param RunSpiderRequest $request
      * @return JsonResponse
      */
@@ -28,45 +28,45 @@ class ScraperController extends Controller
             $spiderTypeValue = $request->validated('spider_type');
             $spiderType = SpiderType::from($spiderTypeValue);
             
-            // Get the spider class from the enum
-            $spiderClass = $spiderType->getSpiderClass();
-            
             // Configure overrides if start_url is provided
             $overrides = $this->buildOverrides($request);
             
-            // Run the spider
-            Roach::startSpider($spiderClass, $overrides);
+            // Dispatch the spider job to run in the background
+            RunSpiderJob::dispatch($spiderType, $overrides);
             
-            return $this->successResponse('Spider started successfully', [
+            return $this->successResponse('Spider job dispatched successfully', [
                 'spider_type' => $spiderType->value,
-                'spider_name' => $spiderType->getDisplayName()
+                'spider_name' => $spiderType->getDisplayName(),
+                'background' => true,
+                'status' => 'queued'
             ]);
         } catch (InvalidArgumentException $e) {
             return $this->errorResponse($e->getMessage(), 400);
-        } catch (\Exception $e) {
-            Log::error('Failed to run spider: ' . $e->getMessage(), [
-                'spider_type' => $request->validated('spider_type'),
-                'exception' => $e,
+        } catch (\Throwable $e) {
+            Log::error('Failed to dispatch spider job: ' . $e->getMessage(), [
+                'exception' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
             ]);
             
-            return $this->errorResponse('Failed to run spider: ' . $e->getMessage(), 500);
+            return $this->errorResponse('Failed to dispatch spider job: ' . $e->getMessage(), 500);
         }
     }
     
     /**
-     * Build overrides configuration for the spider
-     * 
+     * Build overrides array from request
+     *
      * @param RunSpiderRequest $request
-     * @return Overrides|null
+     * @return array
      */
-    private function buildOverrides(RunSpiderRequest $request): ?Overrides
+    private function buildOverrides(RunSpiderRequest $request): array
     {
-        if ($request->has('start_url')) {
-            return new Overrides(
-                startUrls: [$request->validated('start_url')]
-            );
+        $overrides = [];
+        
+        if ($startUrl = $request->validated('start_url')) {
+            $overrides['startUrls'] = [$startUrl];
         }
         
-        return null;
+        return $overrides;
     }
 }
