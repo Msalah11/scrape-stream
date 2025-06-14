@@ -2,65 +2,56 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreProductRequest;
-use App\Http\Requests\UpdateProductRequest;
+use App\Http\Requests\ProductFilterRequest;
 use App\Models\Product;
+use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
+    use ApiResponse;
 
     /**
-     * Show the form for creating a new resource.
+     * Get paginated and filtered products list
+     *
+     * @param ProductFilterRequest $request
+     * @return JsonResponse
      */
-    public function create()
+    public function __invoke(ProductFilterRequest $request): JsonResponse
     {
-        //
+        $products = $this->getFilteredProducts($request);
+        
+        return $this->successResponse(
+            'Products retrieved successfully',
+            ['products' => $products]
+        );
     }
-
+    
     /**
-     * Store a newly created resource in storage.
+     * Apply filters and return paginated products
+     *
+     * @param ProductFilterRequest $request
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public function store(StoreProductRequest $request)
+    private function getFilteredProducts(ProductFilterRequest $request)
     {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Product $product)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Product $product)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateProductRequest $request, Product $product)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Product $product)
-    {
-        //
+        $sort = $request->getSortParams();
+        
+        return Product::query()
+            ->when(
+                $request->filled('search'),
+                fn($query) => $query->where('title', 'like', "%{$request->input('search')}%")
+            )
+            ->when(
+                $request->filled('min_price'),
+                fn($query) => $query->where('price', '>=', $request->input('min_price'))
+            )
+            ->when(
+                $request->filled('max_price'),
+                fn($query) => $query->where('price', '<=', $request->input('max_price'))
+            )
+            ->orderBy($sort['by'], $sort['dir'])
+            ->paginate($request->getPerPage())
+            ->appends($request->validated());
     }
 }
