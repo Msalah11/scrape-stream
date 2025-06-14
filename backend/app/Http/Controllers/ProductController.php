@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProductFilterRequest;
+use App\Http\Resources\ProductCollection;
 use App\Models\Product;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -23,7 +24,7 @@ class ProductController extends Controller
         
         return $this->successResponse(
             'Products retrieved successfully',
-            ['products' => $products]
+            new ProductCollection($products)
         );
     }
     
