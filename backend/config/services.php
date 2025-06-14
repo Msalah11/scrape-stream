@@ -34,5 +34,9 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'proxy_manager' => [
+        'url' => env('PROXY_MANAGER_URL', 'http://proxy-manager:8080'),
+        'timeout' => env('PROXY_MANAGER_TIMEOUT', 5),
+    ],
 
 ];
