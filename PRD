@@ -1,0 +1,175 @@
+# 🧾 Product Requirements Document (PRD)
+
+## 📌 Project Title
+
+**Web Scraping Service with Laravel Backend, Next.js Frontend, and Golang Proxy Manager**
+
+---
+
+## 📘 Overview
+
+This project is a full-stack web scraping application that collects product data from eCommerce platforms (e.g., Amazon, Jumia), stores it in a MySQL database, and displays it on a React-based frontend. The backend is built with Laravel (PHP), the frontend with Next.js (React), and proxy rotation is handled by a lightweight Golang microservice.
+
+---
+
+## 🎯 Goals & Objectives
+
+* Automate the scraping of product information (title, price, image).
+* Mimic human browsing behavior using rotating user-agents and proxies.
+* Provide a clean and responsive frontend display of product data.
+* Refresh data periodically for near real-time updates.
+
+---
+
+## 🛠 Tech Stack
+
+* **Backend**: Laravel (PHP 8+), MySQL, Guzzle HTTP Client
+* **Frontend**: Next.js (React 18+)
+* **Proxy Manager**: Golang
+* **API**: REST (JSON responses)
+
+---
+
+## 📂 Features & Functional Requirements
+
+### 1. Backend - Laravel (PHP)
+
+#### ✅ Laravel Project Setup
+
+* Initialize a new Laravel project.
+* Connect to a MySQL database.
+
+#### ✅ Model: `Product`
+
+| Field       | Type     | Description                |
+| ----------- | -------- | -------------------------- |
+| id          | integer  | Auto-increment primary key |
+| title       | string   | Product title              |
+| price       | string   | Product price              |
+| image\_url  | string   | URL of product image       |
+| created\_at | datetime | Timestamp of entry         |
+
+#### ✅ Scraping Service
+
+* Use **Guzzle HTTP client** to fetch HTML pages.
+* Rotate **user-agent** strings to simulate different browsers.
+* Extract relevant fields from product pages using DOM parsing or regex.
+* Save valid products to the database.
+
+#### ✅ API Endpoint
+
+* `GET /api/products`
+
+  * Returns JSON array of products:
+
+    ```json
+    [
+      {
+        "id": 1,
+        "title": "Product A",
+        "price": "$99",
+        "image_url": "http://...",
+        "created_at": "..."
+      },
+      ...
+    ]
+    ```
+
+#### ✅ Proxy Integration
+
+* Call a Golang microservice to retrieve a fresh proxy.
+* Use the proxy in Guzzle HTTP requests for rotating IPs.
+
+---
+
+### 2. Proxy Manager - Golang
+
+#### ✅ Golang Script
+
+* Expose an HTTP API:
+
+  * `GET /proxy` → Returns a proxy string (e.g., `http://ip:port`)
+* Logic for:
+
+  * Randomly rotating from a proxy pool.
+  * Optionally validating if the proxy is live.
+* Runs independently as a background service.
+
+---
+
+### 3. Frontend - Next.js (React)
+
+#### ✅ Page: `/products`
+
+* Fetch data from Laravel API (`/api/products`) using `fetch` or Axios.
+* Display in a responsive **grid layout** with:
+
+  * Product image
+  * Title
+  * Price
+
+#### ✅ Auto Refresh
+
+* Implement automatic refresh every **30 seconds** using `setInterval`.
+
+---
+
+## 📦 Deliverables
+
+* GitHub repository or ZIP with:
+
+  * `laravel-backend/` (API + scraper)
+  * `nextjs-frontend/` (UI)
+  * `proxy-manager/` (Golang script)
+  * `README.md` with:
+
+    * Setup instructions
+    * Tech stack
+    * Environment variables
+    * How to run each service
+
+---
+
+## 🔧 Non-Functional Requirements
+
+* Use environment variables for API URLs and DB credentials.
+* Clean, modular code with separation of concerns.
+* Mobile-responsive frontend.
+* Proper error handling and fallbacks for failed scraping attempts.
+
+---
+
+## 🧪 Testing Plan
+
+* **Unit Tests**: Laravel (Model, API)
+* **Integration Tests**: Frontend API fetch, scraper to DB
+* **Manual Test Cases**:
+
+  * Scrape from different product URLs.
+  * Simulate API response errors.
+  * Test UI responsiveness on various devices.
+
+---
+
+## 🕒 Timeline (Estimate)
+
+| Task                        | Duration |
+| --------------------------- | -------- |
+| Laravel backend + API       | 2–3 days |
+| Scraper service integration | 2 days   |
+| Golang proxy manager script | 1 day    |
+| Frontend UI (Next.js)       | 2 days   |
+| README + packaging          | 1 day    |
+
+---
+
+## 🧱 Future Enhancements
+
+* Multi-site scraping support.
+* Admin UI for adding new scraping targets.
+* Redis cache for performance.
+* Email alerts on scraping failures.
+
+---
+
+Let me know if you'd like a downloadable version (PDF/Markdown), or a starter repo scaffold for any of the services.
