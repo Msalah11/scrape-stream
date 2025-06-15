@@ -1,17 +1,19 @@
 # Web Scraping Service
 
-A full-stack web scraping application that collects product data from eCommerce platforms, stores it in a MySQL database, and displays it on a React-based frontend.
+A full-stack web scraping application that collects product data from eCommerce platforms, stores it in a MySQL database, and displays it on a React-based frontend. Built with Laravel 12 and PHP 8.2, featuring a modular and extensible spider architecture.
 
 ## Architecture
 
-- **Backend**: Laravel (PHP 8+), MySQL
+- **Backend**: Laravel 12 (PHP 8.2+), MySQL
 - **Frontend**: Next.js (React 18+)
 - **Proxy Manager**: Golang
 - **API**: REST (JSON responses)
+- **Scraping Engine**: RoachPHP with custom spider architecture
+- **Job System**: Laravel Queue for asynchronous spider execution
 
 ## Project Structure
 
-```
+```plaintext
 scrape-stream/
 ├── backend/             # Laravel PHP backend
 ├── frontend/            # Next.js React frontend
@@ -40,7 +42,7 @@ git clone <repository-url>
 cd scrape-stream
 ```
 
-2. Start the Docker containers:
+1. Start the Docker containers:
 
 ```bash
 docker-compose up -d
@@ -54,7 +56,7 @@ This will start all the services:
 - MySQL Database
 - Nginx Web Server
 
-3. Set up the Laravel application:
+1. Set up the Laravel application:
 
 ```bash
 # Enter the Laravel container
@@ -75,3 +77,61 @@ php artisan key:generate
 - **Frontend**: <http://localhost:3000>
 - **Backend API**: <http://localhost:8000/api>
 - **Proxy Manager**: Only accessible from within the Docker network
+
+## Spider Architecture
+
+The application uses a modular spider architecture built on RoachPHP:
+
+### Base Classes and Traits
+
+- **BaseSpider**: Abstract class extending RoachPHP's BasicSpider with common configuration
+- **SpiderHelpers**: Trait with reusable methods for text cleaning, URL validation, etc.
+- **SpiderType**: Enum for type-safe spider management
+
+### Available Spiders
+
+- **AmazonSpider**: Scrapes product listings from Amazon
+- **ProductPageSpider**: Scrapes product details from product pages
+
+### Job System
+
+Spiders run asynchronously via Laravel's queue system:
+
+```php
+RunSpiderJob::dispatch(SpiderType::AMAZON, ['startUrls' => ['https://example.com']]);
+```
+
+## API Endpoints
+
+### Trigger Spider
+
+```http
+POST /api/scrape
+```
+
+Payload:
+
+```json
+{
+  "spider_type": "amazon",
+}
+```
+
+## Commands
+
+The application includes several Artisan commands:
+
+```bash
+# Run a spider directly
+php artisan spider:run
+# Process queued spider jobs
+php artisan queue:work
+```
+
+## Scheduling
+
+Spiders are scheduled to run daily using Laravel's scheduler. Configure crontab to run:
+
+```bash
+* * * * * cd /path-to-your-project && php artisan schedule:run >> /dev/null 2>&1
+```
