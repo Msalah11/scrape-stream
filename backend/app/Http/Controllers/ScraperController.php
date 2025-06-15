@@ -27,10 +27,9 @@ class ScraperController extends Controller
             // Get the spider type from the request and convert to enum
             $spiderTypeValue = $request->validated('spider_type');
             $spiderType = SpiderType::from($spiderTypeValue);
-            
             // Configure overrides if start_url is provided
             $overrides = $this->buildOverrides($request);
-            
+
             // Dispatch the spider job to run in the background
             RunSpiderJob::dispatch($spiderType, $overrides);
             

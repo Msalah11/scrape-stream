@@ -2,16 +2,17 @@
 
 namespace App\Spiders\Processors;
 
+use Throwable;
 use App\Models\Product;
+use App\Traits\SpiderHelpers;
+use RoachPHP\Support\Configurable;
 use Illuminate\Support\Facades\Log;
 use RoachPHP\ItemPipeline\ItemInterface;
 use RoachPHP\ItemPipeline\Processors\ItemProcessorInterface;
-use RoachPHP\Support\Configurable;
-use Throwable;
 
 class ProductProcessor implements ItemProcessorInterface
 {
-    use Configurable;
+    use Configurable, SpiderHelpers;
 
     /**
      * Process a scraped item.
@@ -59,13 +60,5 @@ class ProductProcessor implements ItemProcessorInterface
             
             return $item;
         }
-    }
-    
-    /**
-     * Clean price string and convert to float
-     */
-    protected function cleanPrice(string $price): float
-    {
-        return (float) preg_replace('/[^\d.]/', '', $price);
     }
 }

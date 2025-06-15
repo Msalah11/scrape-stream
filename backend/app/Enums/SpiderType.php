@@ -3,11 +3,13 @@
 namespace App\Enums;
 
 use App\Spiders\AmazonSpider;
+use App\Spiders\ProductPageSpider;
 use InvalidArgumentException;
 
 enum SpiderType: string
 {
     case AMAZON = 'amazon';
+    case PRODUCT_PAGE = 'product_page';
 
     /**
      * Get the spider class for this type
@@ -18,6 +20,7 @@ enum SpiderType: string
     {
         return match($this) {
             self::AMAZON => AmazonSpider::class,
+            self::PRODUCT_PAGE => ProductPageSpider::class,
             default => throw new InvalidArgumentException("Spider class not implemented for {$this->value}"),
         };
     }
@@ -31,6 +34,7 @@ enum SpiderType: string
     {
         return match($this) {
             self::AMAZON => 'Amazon Product Spider',
+            self::PRODUCT_PAGE => 'Product Page Spider',
         };
     }
 
