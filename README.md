@@ -100,7 +100,7 @@ This project is fully containerized using Docker and Docker Compose, making it e
 1. Clone the repository:
 
 ```bash
-git clone <repository-url>
+git clone git@github.com:Msalah11/scrape-stream.git
 cd scrape-stream
 ```
 
